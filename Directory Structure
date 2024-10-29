@@ -1,9 +1,48 @@
-telegram_game_bot/
-├── main.py           # Entry point
-├── config.py         # Configuration (bot token, constants)
-├── handlers/         # Handlers for each page
-│   ├── home.py
-│   ├── tasks.py
-│   ├── invite.py
-│   └── airdrop.py
-└── requirements.txt  # Dependencies
+# main.py
+import logging
+from aiogram import Bot, Dispatcher, types
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.utils import executor
+import config
+
+# Initialize bot and dispatcher
+bot = Bot(token=config.BOT_TOKEN)
+dp = Dispatcher(bot)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
+# Navigation buttons
+def get_navigation_buttons():
+    keyboard = InlineKeyboardMarkup()
+    keyboard.add(InlineKeyboardButton("🏠 Home", callback_data="home"))
+    keyboard.add(InlineKeyboardButton("📋 Tasks", callback_data="tasks"))
+    keyboard.add(InlineKeyboardButton("🤝 Invite", callback_data="invite"))
+    keyboard.add(InlineKeyboardButton("🎁 Airdrop", callback_data="airdrop"))
+    return keyboard
+
+# Start command handler
+@dp.message_handler(commands=["start"])
+async def send_welcome(message: types.Message):
+    await message.answer(
+        "Welcome to the Telegram Mini Game Bot! Use the buttons to navigate.",
+        reply_markup=get_navigation_buttons()
+    )
+
+# Callback query handler for navigation
+@dp.callback_query_handler(lambda c: c.data in ["home", "tasks", "invite", "airdrop"])
+async def navigate(callback_query: types.CallbackQuery):
+    data = callback_query.data
+    if data == "home":
+        await callback_query.message.edit_text("🏠 Welcome to the Home Page!", reply_markup=get_navigation_buttons())
+    elif data == "tasks":
+        await callback_query.message.edit_text("📋 Here are your Tasks!", reply_markup=get_navigation_buttons())
+    elif data == "invite":
+        await callback_query.message.edit_text("🤝 Invite your friends and earn rewards!", reply_markup=get_navigation_buttons())
+    elif data == "airdrop":
+        await callback_query.message.edit_text("🎁 Airdrop section. Complete tasks to earn airdrops!", reply_markup=get_navigation_buttons())
+    await callback_query.answer()  # Acknowledge callback
+
+if __name__ == "__main__":
+    from aiogram import executor
+    executor.start_polling(dp, skip_updates=True)
