@@ -1,0 +1,9 @@
+telegram_game_bot/
+├── main.py           # Entry point
+├── config.py         # Configuration (bot token, constants)
+├── handlers/         # Handlers for each page
+│   ├── home.py
+│   ├── tasks.py
+│   ├── invite.py
+│   └── airdrop.py
+└── requirements.txt  # Dependencies
